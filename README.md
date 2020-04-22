@@ -13,7 +13,7 @@ df_var - Pandas Dataframe
 ps_var - Pandas Series
 ps_mi_var (df_mi_var) - Pandas Series(or DataFrame) MultiIndex
 ```
-Используется конфигуарционный файл с константами <b>defines.yaml</b> <br>
+Используется конфигурационный файл с константами <b>defines.yaml</b> <br>
 Переменные полученные из конфигурационного файла обозначены заглавными буквами. 
 ```python
 CONSTANT_FROM_YAML
