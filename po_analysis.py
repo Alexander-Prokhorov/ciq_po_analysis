@@ -23,10 +23,10 @@ def excel_date(year):
     return delta
 
 
-def df_convert(df, row_name="Test", new_column="Test"):
+def df_convert(df, row="", new_column=""):
     s_old_column = df.columns[0]
     s_old_index = df.index.name if df.index.name else 'index'
-    df = df.reset_index().set_index([[row_name] * len(df)])
+    df = df.reset_index().set_index([[row] * len(df)])
     df = df.pivot(columns=s_old_index, values=[s_old_column])
     df = df.rename(columns={s_old_column:new_column}).rename_axis('Company')\
         .rename_axis(["Parent", "Child"], axis="columns")
@@ -167,16 +167,16 @@ def excel_calculating(FILENAME, HEADER=0, FOOTER=0, NA_VALUES=[]):
             df_top = df_filter.nlargest(3, columns='Common Stock Equivalent Held')
             df_top['Name'] = df_top.index
 
-            df_owt = df_convert(df_owt, row_name=s_company_name, new_column='06. Owner Type (% Of CSO by)')
-            df_mce = df_convert(df_mce, row_name=s_company_name, new_column='07. Market Cap Emphasis (% Of CSO by)')
-            df_cis = df_convert(df_cis, row_name=s_company_name, new_column='08. Calculated Investment Style (% Of CSO by)')
-            df_ptc = df_convert(df_ptc, row_name=s_company_name, new_column='10. Portfolio Turnover Category (% Of CSO by)')
+            df_owt = df_convert(df_owt, row=s_company_name, new_column='06. Owner Type (% Of CSO by)')
+            df_mce = df_convert(df_mce, row=s_company_name, new_column='07. Market Cap Emphasis (% Of CSO by)')
+            df_cis = df_convert(df_cis, row=s_company_name, new_column='08. Calculated Investment Style (% Of CSO by)')
+            df_ptc = df_convert(df_ptc, row=s_company_name, new_column='10. Portfolio Turnover Category (% Of CSO by)')
 
             df_owt_io = df_owt_io.T\
-                            .rename({'% Of CSO': s_company_name})\
-                            .rename(columns=lambda x: '09. Investment Orientation ({}) (% Of CSO by)'.format(x), level=0)
+                          .rename({'% Of CSO': s_company_name})\
+                          .rename(columns=lambda x: '09. Investment Orientation ({}) (% Of CSO by)'.format(x), level=0)
 
-            df_top_cso = df_convert(ps_top_cso.to_frame(), row_name=s_company_name, new_column='02. Tops')
+            df_top_cso = df_convert(ps_top_cso.to_frame(), row=s_company_name, new_column='02. Tops')
 
             df_top = df_top.stack().to_frame().T\
                             .set_index([[s_company_name]])\
@@ -188,9 +188,11 @@ def excel_calculating(FILENAME, HEADER=0, FOOTER=0, NA_VALUES=[]):
                             .rename({'Owner Type': s_company_name})\
                             .rename_axis('Company')\
                             .rename_axis(["Parent", "Child"], axis="columns")\
-                            .rename(columns=lambda x: '11. Portfolio Turnover Category ({}) (Count by Owner Type)'.format(x), level=0)
+                            .rename(columns=lambda x: '11. Portfolio Turnover Category ({}) (Count by Owner Type)'
+                                                                                                   .format(x), level=0)
+            df_sheet_snapshot = pd.concat(
+                    [df_company, df_owt, df_mce, df_cis, df_ptc, df_owt_io, df_top_cso, df_top, df_mi_ptc_owt], axis=1)
 
-            df_sheet_snapshot = pd.concat([df_company, df_owt, df_mce, df_cis, df_ptc, df_owt_io, df_top_cso, df_top, df_mi_ptc_owt], axis=1)
         except (IndexError, TypeError):
             s_description = 'Status: IndexError. Comment: Smth wrong with column values. Commonly with \'% Of CSO\''
             print(s_description)
