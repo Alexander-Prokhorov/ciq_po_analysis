@@ -23,6 +23,13 @@ def excel_date(year):
     return delta
 
 
+def re_extract(string, regexp):
+    l_value = re.findall(regexp, string)
+    # Забираем первое значение в итераторе re.findall, если его нет, то записываем ''
+    s_value = next(iter(l_value), '')
+    return s_value
+
+
 def df_convert(df, row="", new_column=""):
     s_old_column = df.columns[0]
     s_old_index = df.index.name if df.index.name else 'index'
@@ -98,17 +105,11 @@ def excel_calculating(FILENAME, HEADER=0, FOOTER=0, NA_VALUES=[]):
             s_date_raw = d_series[s_sheet][9]
             # Пример sCompany_raw: "Permanent TSB Group Holdings plc (ISE:IL0A) > Public Ownership > Detailed"
             # Пример s_date_raw: "Position Date: Dec-31-2013"
-            l_ticker = re.findall(r'\((.+\:.+)\)', s_company_raw)
-            l_exchange = re.findall(r'\((.+)\:.+\)', s_company_raw)
-            l_ticker_id = re.findall(r'\(.+\:(.+)\)', s_company_raw)
-            l_company_name = re.findall(r'^(.*?)\s[(>]', s_company_raw)
-            l_year = re.findall(r'^.*-(\d\d\d\d)$', s_date_raw)
-            # Забираем первое значение в итераторе re.findall, если его нет, то записываем ''
-            s_ticker = next(iter(l_ticker), '')
-            s_exchange = next(iter(l_exchange), '')
-            s_ticker_id = next(iter(l_ticker_id), '')
-            s_company_name = next(iter(l_company_name), '')
-            s_year = next(iter(l_year), '')
+            s_ticker = re_extract(s_company_raw, r'\((.+\:.+)\)')
+            s_exchange = re_extract(s_company_raw, r'\((.+)\:.+\)')
+            s_ticker_id = re_extract(s_company_raw, r'\(.+\:(.+)\)')
+            s_company_name = re_extract(s_company_raw, r'^(.*?)\s[(>]')
+            s_year = re_extract(s_date_raw, r'^.*-(\d\d\d\d)$')
             print("Sheet: %s, Ticker: %s, Year: %s, Company: %s" % (s_sheet, s_ticker, s_year, s_company_name))
             dt.datetime(int(s_year), 1, 1)  # Это тест на корректность выгрузки года, для try-except.
         except ValueError:
